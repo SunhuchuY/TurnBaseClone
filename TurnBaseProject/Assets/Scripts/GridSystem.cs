@@ -24,19 +24,13 @@ public class GridSystem
         {
             for (int z = 0; z < height; z++)
             {
-                Debug.DrawLine(GetWorldPosition(x,z), GetWorldPosition(x, z) + Vector3.right * 0.2f, Color.black, DEBUG_DRAWLINE_DURATION);
-
                 GridPosition gridPosition = new GridPosition(x, z);
                 gridObjectArray[x, z] = new GridObject(this, gridPosition);
-
             }
         }
     }
 
-    public Vector3 GetWorldPosition(int x, int z)
-    {
-        return new Vector3(x, 0, z);
-    }
+    public Vector3 GetWorldPosition(GridPosition gridPosition) => new Vector3(gridPosition.x * cellSize, 0, gridPosition.z * cellSize);
 
     public GridPosition GetGridPosition(Vector3 worldPosition)
     {
@@ -52,8 +46,23 @@ public class GridSystem
         {
             for (int z = 0; z < height; z++)
             {
-                Transform debugTransform = GameObject.Instantiate(debugPrefab, GetWorldPosition(x, z), debugPrefab.transform.rotation);
+                GridPosition gridPosition = new GridPosition(x, z);
+                Transform debugTransform = GameObject.Instantiate(debugPrefab, GetWorldPosition(gridPosition), debugPrefab.transform.rotation);
+                GridDebugObject gridDebugObject = debugTransform.GetComponent<GridDebugObject>();
+                gridDebugObject.SetGridObject(GetGridObject(gridPosition));
             }
         }
+    }
+
+    public GridObject GetGridObject(GridPosition gridPosition) => gridObjectArray[gridPosition.x, gridPosition.z];
+    public int GetWidth() => width;
+    public int GetHeight() => height;
+    public bool IsValidGridPosition(GridPosition gridPosition) 
+    {
+        return 
+            gridPosition.x >= 0 && 
+            gridPosition.x < width && 
+            gridPosition.z >= 0 && 
+            gridPosition.z < height;
     }
 }

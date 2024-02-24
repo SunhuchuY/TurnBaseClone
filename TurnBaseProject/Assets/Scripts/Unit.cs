@@ -4,38 +4,34 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const float STOPPING_DISTANCE = 0.1f;
-    private const float MOVE_SPEED = 4f;
-    private const float ROTATE_SPEED = 10f;
-
-    [SerializeField] private Animator unitAnimator;
-
-    private Vector3 targetPos;
+    private MoveAction moveAction;  
+    private SpinAction spinAction;  
+    private GridPosition gridPosition;
 
     private void Awake()
     {
-        targetPos = transform.position;
+        moveAction = GetComponent<MoveAction>();
+        spinAction = GetComponent<SpinAction>();    
+    }   
+
+    private void Start()
+    {
+        gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+        LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
     }
 
     private void Update()
     {
-        if (Vector3.Distance(targetPos, transform.position) > STOPPING_DISTANCE)
+        GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+        if (newGridPosition != gridPosition)
         {
-            Vector3 dir = (targetPos - transform.position).normalized;
-            
-            transform.position += dir * MOVE_SPEED * Time.deltaTime;
-            transform.forward = Vector3.Lerp(transform.forward, dir, Time.deltaTime * ROTATE_SPEED);
+            // Changed gridPosition
+            LevelGrid.Instance.UnitMovedGridPosition(this, gridPosition, newGridPosition);
+            gridPosition = newGridPosition; 
+        }
+    }
 
-            unitAnimator.SetBool("IsWalking", true);
-        }
-        else
-        {
-            unitAnimator.SetBool("IsWalking", false);
-        }
-    }
-     
-    public void Move(Vector3 targetPos)
-    {
-        this.targetPos = targetPos;
-    }
+    public MoveAction GetMoveAction() => moveAction;
+    public SpinAction GetSpinAction() => spinAction;
+    public GridPosition GetGridPosition() => gridPosition;
 }

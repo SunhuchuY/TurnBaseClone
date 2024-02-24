@@ -22,10 +22,20 @@ public class UnitActionSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) 
+        if (Input.GetMouseButtonDown(0))
         {
-            if (TryHandleUnitSelection()) return; 
-            selectUnit.Move(MouseWorld.GetPosition());
+            if (TryHandleUnitSelection()) return;
+
+            GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
+            if (selectUnit.GetMoveAction().IsValidActionGridPosition(mouseGridPosition))
+            {
+                selectUnit.GetMoveAction().Move(mouseGridPosition);
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            selectUnit.GetSpinAction().Spin();
         }
     }
 
