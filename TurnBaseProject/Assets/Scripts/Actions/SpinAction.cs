@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SpinAction : BaseAction
@@ -17,13 +19,28 @@ public class SpinAction : BaseAction
 
         if (totalSpinAmount > 360f)
         {
-            isActive = false;
-            totalSpinAmount = 0;
+            ActionComplete();
         }
     }
 
-    public void Spin()
+    public override int GetActionPointsCost() => 2;
+
+    public override string GetActionName() => "Spin";
+
+    public override List<GridPosition> GetValidActionGridPositionList()
     {
-        isActive = true;
+        GridPosition currentGridPosition = unit.GetGridPosition();
+
+        return new List<GridPosition>()
+        {   
+            currentGridPosition
+        };
+    }
+
+    public override void TakeAction(GridPosition mouseGridPosition, Action onActionComplete)
+    {
+        ActionStart(onActionComplete);
+
+        totalSpinAmount = 0;
     }
 }
