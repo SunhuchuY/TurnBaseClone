@@ -39,8 +39,17 @@ public class SpinAction : BaseAction
 
     public override void TakeAction(GridPosition mouseGridPosition, Action onActionComplete)
     {
-        ActionStart(onActionComplete);
-
         totalSpinAmount = 0;
+        
+        ActionStart(onActionComplete);
+    }
+
+    public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
+    {
+        return new EnemyAIAction
+        {
+            gridPosition = gridPosition,
+            actionValue = 0
+        };
     }
 }

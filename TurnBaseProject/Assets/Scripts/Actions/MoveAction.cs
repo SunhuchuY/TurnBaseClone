@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class MoveAction : BaseAction
 {
+    public event EventHandler OnStartMoving;
+    public event EventHandler OnStopMoving;
+
     private const float STOPPING_DISTANCE = 0.1f;
     private const float MOVE_SPEED = 4f;
     private const float ROTATE_SPEED = 10f;
 
     [SerializeField] private int MAX_MOVE_DISTNACE = 4;
-    [SerializeField] private Animator unitAnimator;
 
     private Vector3 targetPos;
 
@@ -31,12 +33,12 @@ public class MoveAction : BaseAction
         
         if (Vector3.Distance(targetPos, transform.position) > STOPPING_DISTANCE)
         {
+            OnStartMoving?.Invoke(this, EventArgs.Empty);
             transform.position += moveDirection * MOVE_SPEED * Time.deltaTime;
-            unitAnimator.SetBool("IsWalking", true);
         }
         else
         {
-            unitAnimator.SetBool("IsWalking", false);
+            OnStopMoving?.Invoke(this, EventArgs.Empty);
             ActionComplete();
         }
 
@@ -85,8 +87,19 @@ public class MoveAction : BaseAction
 
     public override void TakeAction(GridPosition mouseGridPosition, Action onActionComplete)
     {
-        ActionStart(onActionComplete);
-
         targetPos = LevelGrid.Instance.GetWorldPosition(mouseGridPosition);
+        
+        ActionStart(onActionComplete);
+    }
+
+    public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
+    {
+        int targetCountAtGridPosition = unit.GetShootAction().GetTargetCountAtPosition();
+
+        return new EnemyAIAction
+        {
+            gridPosition = gridPosition,
+            actionValue = targetCountAtGridPosition * 10
+        };
     }
 }

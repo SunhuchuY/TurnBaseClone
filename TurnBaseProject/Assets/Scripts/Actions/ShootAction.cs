@@ -12,11 +12,20 @@ public class ShootAction : BaseAction
         Cooloff,
     }
 
-    private const int MAX_SHOOT_DISTNACE = 7;
+    public class OnShootEventArgs : EventArgs
+    {
+        public Unit targetUnit;
+        public Unit shootingUnit;
+    }
+
+    public event EventHandler<OnShootEventArgs> OnShoot;
+
     private const float AIMING_STATE_TIME = 1f;
     private const float SHOOTING_STATE_TIME = 0.1f;
     private const float COOLOFF_STATE_TIME = 0.5f;
     private const float ROTATION_SPEED = 10f;
+
+    [SerializeField] private int maxShootDistance = 2;
 
     private Unit targetUnit;
     private State state;
@@ -77,20 +86,31 @@ public class ShootAction : BaseAction
 
     private void Shoot()
     {
-        targetUnit.Damage();
+        OnShoot?.Invoke(this, new OnShootEventArgs() {
+            shootingUnit = unit,    
+            targetUnit = targetUnit
+        });
+        
+        targetUnit.Damage(40);
     }
 
     public override string GetActionName() => "Shoot";
 
-    public override List<GridPosition> GetValidActionGridPositionList()
+    public Unit GetTargetUnit() => targetUnit;
+
+    public int GetMaxShootDistance() => maxShootDistance;
+
+    public int GetTargetCountAtPosition() => GetValidActionGridPositionList().Count;
+
+    public override List<GridPosition> GetValidActionGridPositionList() => GetValidActionGridPositionList(unit.GetGridPosition());
+
+    public List<GridPosition> GetValidActionGridPositionList(GridPosition unitGridPosition)
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        GridPosition unitGridPosition = unit.GetGridPosition();
-
-        for (int x = -MAX_SHOOT_DISTNACE; x <= MAX_SHOOT_DISTNACE; x++)
+        for (int x = - maxShootDistance; x <= maxShootDistance; x++)
         {
-            for (int z = -MAX_SHOOT_DISTNACE; z <= MAX_SHOOT_DISTNACE; z++)
+            for (int z = - maxShootDistance; z <= maxShootDistance; z++)
             {
                 GridPosition offSetGridPosition = new GridPosition(x, z);
                 GridPosition testGridPosition = unitGridPosition + offSetGridPosition;
@@ -102,7 +122,7 @@ public class ShootAction : BaseAction
                 }
 
                 int testDistance = Mathf.Abs(x) + Mathf.Abs(z);
-                if (testDistance > MAX_SHOOT_DISTNACE)
+                if (testDistance > maxShootDistance)
                 {
                     continue;
                 }
@@ -135,12 +155,23 @@ public class ShootAction : BaseAction
 
     public override void TakeAction(GridPosition mouseGridPosition, Action onCompleteAction)
     {
-        ActionStart(onCompleteAction);
-
         targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(mouseGridPosition);
 
         canShootBullet = true;
         state = State.Aiming;
         stateTimer = AIMING_STATE_TIME;
+
+        ActionStart(onCompleteAction);
+    }
+
+    public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
+    {
+        Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(gridPosition);
+
+        return new EnemyAIAction
+        {
+            gridPosition = gridPosition,
+            actionValue = 100 + Mathf.RoundToInt((1 - targetUnit.GetHealthNormalized()) * 100)
+        };
     }
 }
