@@ -14,13 +14,8 @@ public class MoveAction : BaseAction
 
     [SerializeField] private int MAX_MOVE_DISTNACE = 4;
 
-    private Vector3 targetPos;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        targetPos = transform.position;
-    }
+    private List<Vector3> positionList;
+    private int currentPositionIndex;
 
     private void Update()
     {
@@ -29,6 +24,7 @@ public class MoveAction : BaseAction
             return;
         }
 
+        Vector3 targetPos = positionList[currentPositionIndex];
         Vector3 moveDirection = (targetPos - transform.position).normalized;
         
         if (Vector3.Distance(targetPos, transform.position) > STOPPING_DISTANCE)
@@ -38,8 +34,13 @@ public class MoveAction : BaseAction
         }
         else
         {
-            OnStopMoving?.Invoke(this, EventArgs.Empty);
-            ActionComplete();
+            currentPositionIndex++;
+
+            if (currentPositionIndex >= positionList.Count)
+            {
+                OnStopMoving?.Invoke(this, EventArgs.Empty);
+                ActionComplete();
+            }
         }
 
         transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * ROTATE_SPEED);
@@ -76,6 +77,22 @@ public class MoveAction : BaseAction
                     continue;
                 }
 
+                if (!Pathfinding.Instance.IsWalkableGridPosition(testGridPosition))
+                {
+                    continue;
+                }
+
+                if (!Pathfinding.Instance.HasPath(unitGridPosition, testGridPosition))
+                {
+                    continue;
+                }
+
+                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) > MAX_MOVE_DISTNACE * Pathfinding.MOVE_STRAIGHT_COST)
+                {
+                    // PathLength is too long.
+                    continue;
+                }
+
                 validGridPositionList.Add(testGridPosition);
             }
         }
@@ -85,16 +102,25 @@ public class MoveAction : BaseAction
 
     public override string GetActionName() => "Move";
 
-    public override void TakeAction(GridPosition mouseGridPosition, Action onActionComplete)
+    public override void TakeAction(GridPosition endGridPosition, Action onActionComplete)
     {
-        targetPos = LevelGrid.Instance.GetWorldPosition(mouseGridPosition);
-        
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), endGridPosition, out int pathLength);
+
+        currentPositionIndex = 0;
+        positionList = new List<Vector3>();
+
+        foreach (GridPosition pathGridPosition in pathGridPositionList)
+        {
+            Vector3 pathWorldPosition = LevelGrid.Instance.GetWorldPosition(pathGridPosition);
+            positionList.Add(pathWorldPosition);
+        }
+
         ActionStart(onActionComplete);
     }
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
-        int targetCountAtGridPosition = unit.GetShootAction().GetTargetCountAtPosition();
+        int targetCountAtGridPosition = unit.GetAction<ShootAction>().GetTargetCountAtPosition();
 
         return new EnemyAIAction
         {

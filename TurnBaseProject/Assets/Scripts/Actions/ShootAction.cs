@@ -26,11 +26,13 @@ public class ShootAction : BaseAction
     private const float ROTATION_SPEED = 10f;
 
     [SerializeField] private int maxShootDistance = 2;
+    [SerializeField] private LayerMask obstacleLayerMask;
 
     private Unit targetUnit;
     private State state;
     private float stateTimer;
     private bool canShootBullet;
+
 
     private void Update()
     {
@@ -143,6 +145,21 @@ public class ShootAction : BaseAction
                 // Both Units on same 'team'
                 if (targetUnit.IsEnemy() == unit.IsEnemy())
                 {
+                    continue;
+                }
+
+                Vector3 unitWorldPosition = unit.GetWorldPosition();
+                Vector3 shootDir = (targetUnit.GetWorldPosition() - unitWorldPosition).normalized;
+
+                float unitShoulderHeight = 1.7f;
+                if (Physics.Raycast(
+                    unitWorldPosition + Vector3.up * unitShoulderHeight,
+                    shootDir,
+                    Vector3.Distance(targetUnit.GetWorldPosition(), unitWorldPosition),
+                    obstacleLayerMask
+                    ))
+                {
+                    // Blocked the Obstacle.
                     continue;
                 }
 
