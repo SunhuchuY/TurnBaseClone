@@ -9,20 +9,25 @@ public class Testing : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
-            GridPosition startGridPosition = new GridPosition(0, 0);
+            ScreenShake.Instance.Shake(5f);
+        }
+    }
 
-            List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(startGridPosition, mouseGridPosition, out int pathLength); 
+    private void TestToDrawPathLine()
+    {
+        GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
+        GridPosition startGridPosition = new GridPosition(0, 0);
 
-            for (int i = 0; i < pathGridPositionList.Count - 1; i++)
-            {
-                Debug.DrawLine(
-                    LevelGrid.Instance.GetWorldPosition(pathGridPositionList[i]),
-                    LevelGrid.Instance.GetWorldPosition(pathGridPositionList[i + 1]),
-                    Color.white,
-                    10f
-                    );
-            }
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(startGridPosition, mouseGridPosition, out int pathLength);
+
+        for (int i = 0; i < pathGridPositionList.Count - 1; i++)
+        {
+            Debug.DrawLine(
+                LevelGrid.Instance.GetWorldPosition(pathGridPositionList[i]),
+                LevelGrid.Instance.GetWorldPosition(pathGridPositionList[i + 1]),
+                Color.white,
+                10f
+                );
         }
     }
 }

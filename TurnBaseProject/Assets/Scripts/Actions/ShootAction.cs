@@ -18,6 +18,7 @@ public class ShootAction : BaseAction
         public Unit shootingUnit;
     }
 
+    public static event EventHandler<OnShootEventArgs> OnAnyShoot;
     public event EventHandler<OnShootEventArgs> OnShoot;
 
     private const float AIMING_STATE_TIME = 1f;
@@ -33,6 +34,11 @@ public class ShootAction : BaseAction
     private float stateTimer;
     private bool canShootBullet;
 
+
+    protected override void Awake()
+    {
+        base.Awake();
+    }
 
     private void Update()
     {
@@ -92,7 +98,13 @@ public class ShootAction : BaseAction
             shootingUnit = unit,    
             targetUnit = targetUnit
         });
-        
+
+        OnAnyShoot?.Invoke(this, new OnShootEventArgs()
+        {
+            shootingUnit = unit,
+            targetUnit = targetUnit
+        });
+
         targetUnit.Damage(40);
     }
 

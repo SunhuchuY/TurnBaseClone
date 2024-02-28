@@ -6,6 +6,11 @@ public class SpinAction : BaseAction
 {
     private float totalSpinAmount;
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     private void Update()
     {
         if (!isActive)

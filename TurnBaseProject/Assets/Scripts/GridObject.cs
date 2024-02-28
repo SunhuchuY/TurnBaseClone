@@ -6,6 +6,8 @@ public class GridObject
     private GridPosition gridPosition;
     private List<Unit> unitList;
 
+    private IInteractable interactable;
+
     public GridObject(GridSystem<GridObject> gridSystem, GridPosition gridPosition)
     {
         this.gridSystem = gridSystem;
@@ -36,8 +38,15 @@ public class GridObject
         unitList.Remove(unit);
     }
 
+    public void SetInteractable(IInteractable interactable)
+    {
+        this.interactable = interactable; 
+    }
+
     public List<Unit> GetUnitList()  => unitList;
     public bool HasAnyUnit() => unitList.Count > 0;
 
     public Unit GetUnit() => unitList[0];
+
+    public IInteractable GetInteractable() => interactable;
 }

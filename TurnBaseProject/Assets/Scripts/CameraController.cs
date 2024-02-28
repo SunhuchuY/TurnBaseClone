@@ -32,39 +32,15 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
-        Vector3 inputMoveDir = Vector3.zero;
-        if (Input.GetKey(KeyCode.W))
-        {
-            inputMoveDir.z = +1f;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            inputMoveDir.z = -1f;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            inputMoveDir.x = -1f;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            inputMoveDir.x = +1f;
-        }
+        Vector2 inputMoveDir = InputManager.Instance.CameraMoveVector;
 
-        Vector3 moveVector = transform.forward * inputMoveDir.z + transform.right * inputMoveDir.x;
+        Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
         transform.position += moveVector * MOVE_SPEED * Time.deltaTime;
     }
 
     private void HandleRotation()
     {
-        Vector3 rotationVector = Vector3.zero;
-        if (Input.GetKey(KeyCode.Q))
-        {
-            rotationVector.y = +1f;
-        }
-        if (Input.GetKey(KeyCode.E))
-        {
-            rotationVector.y = -1f;
-        }
+        Vector3 rotationVector = new Vector3(0, InputManager.Instance.CameraRotationAmount, 0);
 
         transform.eulerAngles += rotationVector * ROTATION_SPEED * Time.deltaTime;
     }
@@ -72,12 +48,13 @@ public class CameraController : MonoBehaviour
     private void HandleZoom()
     {
         CinemachineTransposer cinemachineTransposer = cinemachineVirtualCamera.GetCinemachineComponent<CinemachineTransposer>();
+        float mouseScrollDeltaY = InputManager.Instance.MouseScrollDeltaY;
 
-        if (Input.mouseScrollDelta.y > 0)
+        if (mouseScrollDeltaY > 0)
         {
             targetFollowOffset.y -= ZOOM_AMOUNT;
         }
-        if (Input.mouseScrollDelta.y < 0)
+        if (mouseScrollDeltaY < 0)
         {
             targetFollowOffset.y += ZOOM_AMOUNT;
         }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int MAX_ACTION_POINTS = 2;
+    private const int MAX_ACTION_POINTS = 7;
 
     public static event EventHandler OnAnyActionPointsChanged;
     public static event EventHandler OnAnyUnitSpawned;
@@ -82,9 +82,9 @@ public class Unit : MonoBehaviour
     {
         LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
         
-        Destroy(gameObject);
-    
         OnAnyUnitDead?.Invoke(this, EventArgs.Empty);
+        
+        Destroy(gameObject);
     }
 
     public void Damage(int damageAmount)

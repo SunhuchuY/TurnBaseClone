@@ -58,6 +58,11 @@ public class LevelGrid : MonoBehaviour
         OnAnyUnitMovedGridPosition?.Invoke(this, EventArgs.Empty);
     }
 
+    public void SetInteractableAtGridPosition(GridPosition gridPosition, IInteractable interactable)
+    {
+        gridSystem.GetTGridObject(gridPosition).SetInteractable(interactable);
+    }
+
     public List<Unit> GetUnitListAtGridPosition(GridPosition gridPosition) => gridSystem.GetTGridObject(gridPosition).GetUnitList();
     public GridPosition GetGridPosition(Vector3 worldPosition) => gridSystem.GetGridPosition(worldPosition);
     public Vector3 GetWorldPosition(GridPosition gridPosition) => gridSystem.GetWorldPosition(gridPosition);
@@ -66,4 +71,7 @@ public class LevelGrid : MonoBehaviour
     public int GetWidth() => gridSystem.GetWidth();
     public int GetHeight() => gridSystem.GetHeight();
     public Unit GetUnitAtGridPosition(GridPosition gridPosition) => gridSystem.GetTGridObject(gridPosition).GetUnit();
+    public IInteractable GetInteractableAtGridPosition(GridPosition gridPosition) => gridSystem.GetTGridObject(gridPosition).GetInteractable();
+
 }
+
